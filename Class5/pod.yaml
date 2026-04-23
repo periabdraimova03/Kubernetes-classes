@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pv-recycler
+  namespace: default
+spec:
+  restartPolicy: Never
+  volumes:
+  - name: vol
+    hostPath:
+      path: /any/path
+  containers:
+  - name: pv-recycler
+    image: nginx
+    volumeMounts:
+    - name: vol
+      mountPath: /scrub

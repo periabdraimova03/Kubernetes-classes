@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.deployment.name }}
+spec:
+  replicas: {{ .Values.deployment.replicas }}
+  selector:
+    matchLabels:
+      app: devops-api
+  template:
+    metadata:
+      labels:
+        app: devops-api
+    spec:
+      containers:
+      - name: devops-api
+        image: {{ .Values.deployment.repository.image }}:{{ .Values.deployment.repository.tag }}
+        ports:
+        - containerPort: 3001
+        readinessProbe:
+          httpGet:
+            path: /api/status
+            port: 3001
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /api/status
+            port: 3001
+          initialDelaySeconds: 5
+          periodSeconds: 20        
+        env:
+        - name: DBUSER
+          valueFrom:  
+            configMapKeyRef:
+              name: devops-api-config
+              key: DBUSER
+        - name: DB
+          valueFrom:
+            configMapKeyRef:
+              name: devops-api-config
+              key: DB
+        - name: DBPASS
+          valueFrom:
+            secretKeyRef:
+              name: devops-api-secret
+              key: DBPASS
+        - name: DBHOST
+          valueFrom:
+            configMapKeyRef:
+              name: devops-api-config
+              key: DBHOST
+        - name: DBPORT
+          valueFrom:
+            configMapKeyRef:
+              name: devops-api-config
+              key: DBPORT
+        - name: PORT
+          value: "3001"
